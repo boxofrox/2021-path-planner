@@ -9,4 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
   for (const type of ['chrome', 'node', 'electron']) {
     replaceText(`${type}-version`, process.versions[type])
   }
+
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
 })
