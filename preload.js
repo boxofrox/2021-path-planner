@@ -1,3 +1,5 @@
+const fieldimage = new Image();
+
 // All of the Node.js APIs are available in the preload process.
 // It has the same sandbox as a Chrome extension.
 window.addEventListener('DOMContentLoaded', () => {
@@ -11,13 +13,20 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   const canvas = document.getElementById('canvas');
-  const context = canvas.getContext('2d');
+ 
 
-  const image = new Image();
-  image.src = 'images/field.png';
-  image.addEventListener('load', (ev) => {
-    console.log("before drawing image", ev);
-    context.drawImage(image, 0, 0);
-    console.log("After drawing image");
+  fieldimage.src = 'images/field.png';
+  fieldimage.addEventListener('load', (ev) => {
+    onFieldLoaded(ev, canvas);
   })
 })
+function onFieldLoaded(ev, canvas) {
+
+  const image = ev.path[0];
+
+  canvas.width = image.width;
+  canvas.height = image.height;
+
+  const context = canvas.getContext('2d');
+  context.drawImage(image, 0, 0);
+}
