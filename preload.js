@@ -3,6 +3,7 @@ const Tool = {
   WAYPOINT: 1,
   FINISH: 2,
   NONE: 3,
+  SELECT: 4,
 };
 
 const fieldImage = new Image();
@@ -43,6 +44,10 @@ function onFieldLoaded(ev, canvas) {
     {
       id: 'finish-tool',
       state: Tool.FINISH,
+    },
+    {
+      id: 'select-tool',
+      state: Tool.SELECT,
     },
   ];
 
