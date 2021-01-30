@@ -1,12 +1,12 @@
-const fieldimage = new Image();
+const fieldImage = new Image();
 
 // All of the Node.js APIs are available in the preload process.
 // It has the same sandbox as a Chrome extension.
 window.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('canvas');
 
-  fieldimage.src = 'images/field.png';
-  fieldimage.addEventListener('load', (ev) => {
+  fieldImage.src = 'images/field.png';
+  fieldImage.addEventListener('load', (ev) => {
     onFieldLoaded(ev, canvas);
   })
 })
