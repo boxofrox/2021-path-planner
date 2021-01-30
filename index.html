@@ -29,6 +29,11 @@ body {
     flex-direction:column;
 
   }
+
+  .toolbar > :not(.active) {
+    filter: grayscale(1);
+  }
+
 </style>
 
     <meta charset="UTF-8">
@@ -39,9 +44,9 @@ body {
   </head>
   <body>
 <div class="toolbar">
-  <img src="images/start.png" />
-  <img src="images/waypoint.png" />
-  <img src="images/finish.png" />
+  <img id="start-tool" class="tool" src="images/start.png" />
+  <img id="waypoint-tool" class="tool" src="images/waypoint.png" />
+  <img id="finish-tool" class="tool" src="images/finish.png" />
 </div>
 <div class="field">
   <canvas id="canvas"></canvas>
