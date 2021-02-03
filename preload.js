@@ -1,3 +1,16 @@
+//Custom types
+
+const Point = (x, y) => ({x, y});
+
+const Pose = (type, point, enterHandle, exitHandle) => {
+  return{
+    type,
+    point,
+    enterHandle, 
+    exitHandle,
+  };
+};
+
 // Constants
 
 const Tool = {
@@ -18,9 +31,8 @@ const toolStateToName = {
 // Global variable
 
 let toolState = Tool.NONE;
-
 const images = {};
-
+const poseList = [];
 const config = {
   imageFiles: [
     { name: 'field'
@@ -75,6 +87,18 @@ function onFieldLoaded(canvas) {
   canvas.width = images.field.width;
   canvas.height = images.field.height;
 
+  canvas.addEventListener('click', (ev) => {
+    const x = ev.clientX - canvas.offsetLeft;
+    const y = ev.clientY - canvas.clientTop;
+
+    // Compute the canvas position of the cursor relative to the canvas.
+    const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
+    const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
+    placePointAt(x2,y2);
+    clearCanvas(canvas);
+    drawAllPoses(canvas);
+  });
+
   canvas.addEventListener('mousemove', (ev) => {
     const tool = toolStateToName[toolState];
 
@@ -92,6 +116,7 @@ function onFieldLoaded(canvas) {
 
     if ('' != tool) {
       clearCanvas(canvas);
+      drawAllPoses(canvas);
       drawTool(canvas, tool, x3, y3);
     }
   });
@@ -142,6 +167,27 @@ function drawTool(canvas, tool, x, y) {
   context.drawImage(images[tool], x, y);
 }
 
+function drawAllPoses(canvas) {
+  const context = canvas.getContext('2d');
+  for (let pose of poseList) {
+    const image_name = toolStateToName[pose.type];
+    const image = images[image_name];
+
+    // Center tool image on cursor.
+    const x = pose.point.x - image.width / 2;
+    const y = pose.point.y - image.height / 2;
+    context.drawImage(image, x, y);
+  }
+}
+
 function map(value, x1, w1, x2, w2) {
   return (value - x1) * w2 / w1 + x2;
+}
+
+function placePointAt(x,y) {
+  const new_point = Point(x, y);
+
+  const new_pose = Pose(toolState, new_point, new_point, new_point);
+
+  poseList.push(new_pose)
 }
