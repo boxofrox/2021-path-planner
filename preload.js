@@ -1,3 +1,5 @@
+// Constants
+
 const Tool = {
   START: 0,
   WAYPOINT: 1,
@@ -13,6 +15,7 @@ const toolStateToName = {
   [Tool.NONE]: '',
   [Tool.SELECT]: 'select',
 };
+// Global variable
 
 let toolState = Tool.NONE;
 
