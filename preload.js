@@ -2,9 +2,8 @@
 
 const Point = (x, y) => ({x, y});
 
-const Pose = (type, point, enterHandle, exitHandle) => {
+const Pose = (point, enterHandle, exitHandle) => {
   return{
-    type,
     point,
     enterHandle, 
     exitHandle,
@@ -91,6 +90,8 @@ function onFieldLoaded(canvas) {
     const x = ev.clientX - canvas.offsetLeft;
     const y = ev.clientY - canvas.clientTop;
 
+    if (toolState == Tool.NONE) return;
+
     // Compute the canvas position of the cursor relative to the canvas.
     const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
     const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
@@ -109,12 +110,12 @@ function onFieldLoaded(canvas) {
     // Compute the canvas position of the cursor relative to the canvas.
     const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
     const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
-
-    // Center tool image on cursor.
-    const x3 = x2 - images[tool].width / 2;
-    const y3 = y2 - images[tool].height / 2;
-
+    
     if ('' != tool) {
+      // Center tool image on cursor.
+      const x3 = x2 - images[tool].width / 2;
+      const y3 = y2 - images[tool].height / 2;
+
       clearCanvas(canvas);
       drawAllPoses(canvas);
       drawTool(canvas, tool, x3, y3);
@@ -167,16 +168,35 @@ function drawTool(canvas, tool, x, y) {
   context.drawImage(images[tool], x, y);
 }
 
-function drawAllPoses(canvas) {
-  const context = canvas.getContext('2d');
-  for (let pose of poseList) {
-    const image_name = toolStateToName[pose.type];
-    const image = images[image_name];
+function drawPose(context, pose, image) {
+  const dw = 32;
+  const dh = 32;
 
-    // Center tool image on cursor.
-    const x = pose.point.x - image.width / 2;
-    const y = pose.point.y - image.height / 2;
-    context.drawImage(image, x, y);
+  // Center tool image on cursor.
+  const x = pose.point.x - dw / 2;
+  const y = pose.point.y - dh / 2;
+  context.drawImage(image, x, y, dw, dh);
+}
+
+function drawAllPoses(canvas) {
+  if (poseList.length < 1) return;
+
+  const context = canvas.getContext('2d');
+
+  const first = poseList.slice(0, 1);
+  const inner = poseList.slice(1, -1);
+  const last = poseList.slice(-1);
+
+  drawPose(context, first[0], images[toolStateToName[Tool.START]]);
+
+  for (let pose of inner) {
+    const image = images[toolStateToName[Tool.WAYPOINT]];
+
+    drawPose(context, pose, image);
+  }
+
+  if (poseList.length > 1) {
+    drawPose(context, last[0], images[toolStateToName[Tool.FINISH]]);
   }
 }
 
@@ -187,7 +207,7 @@ function map(value, x1, w1, x2, w2) {
 function placePointAt(x,y) {
   const new_point = Point(x, y);
 
-  const new_pose = Pose(toolState, new_point, new_point, new_point);
+  const new_pose = Pose(new_point, new_point, new_point);
 
   poseList.push(new_pose)
 }
