@@ -32,6 +32,7 @@ const toolStateToName = {
 let toolState = Tool.NONE;
 const images = {};
 const poseList = [];
+let hoveredPose = null;
 const config = {
   imageFiles: [
     { name: 'field'
@@ -90,14 +91,23 @@ function onFieldLoaded(canvas) {
     const x = ev.clientX - canvas.offsetLeft;
     const y = ev.clientY - canvas.clientTop;
 
-    if (toolState == Tool.NONE) return;
+    switch (toolState) {
+      case Tool.NONE:
+        //Do nothing
+        break;
 
-    // Compute the canvas position of the cursor relative to the canvas.
-    const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
-    const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
-    placePointAt(x2,y2);
-    clearCanvas(canvas);
-    drawAllPoses(canvas);
+      case Tool.SELECT:
+        break;
+
+      case Tool.POSE:
+        // Compute the canvas position of the cursor relative to the canvas.
+        const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
+        const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
+        placePointAt(x2,y2);
+        clearCanvas(canvas);
+        drawAllPoses(canvas);
+        break;
+    }
   });
 
   canvas.addEventListener('mousemove', (ev) => {
@@ -111,14 +121,30 @@ function onFieldLoaded(canvas) {
     const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
     const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
     
-    if ('' != tool) {
-      // Center tool image on cursor.
-      const x3 = x2 - images[tool].width / 2;
-      const y3 = y2 - images[tool].height / 2;
+    switch (toolState) {
+      case Tool.SELECT:
+        hoveredPose = findPoseNear(x2, y2);
+        clearCanvas(canvas);
+        drawAllPoses(canvas);
+        break;
 
-      clearCanvas(canvas);
-      drawAllPoses(canvas);
-      drawTool(canvas, tool, x3, y3);
+      case Tool.NONE:
+        //Don't do anything
+        break;
+
+      case Tool.POSE:
+        // Center tool image on cursor.
+        const x3 = x2 - images[tool].width / 2;
+        const y3 = y2 - images[tool].height / 2;
+
+        clearCanvas(canvas);
+        drawAllPoses(canvas);
+        drawTool(canvas, tool, x3, y3);
+        break;
+    }
+
+    if ('' != tool) {
+
     }
   });
 
@@ -161,13 +187,13 @@ function drawTool(canvas, tool, x, y) {
 }
 
 function drawPose(context, pose, image) {
-  const dw = 32;
-  const dh = 32;
+  const selected = pose===hoveredPose;
+  const size = selected ? 40 : 32;
 
   // Center tool image on cursor.
-  const x = pose.point.x - dw / 2;
-  const y = pose.point.y - dh / 2;
-  context.drawImage(image, x, y, dw, dh);
+  const x = pose.point.x - size / 2;
+  const y = pose.point.y - size / 2;
+  context.drawImage(image, x, y, size, size);
 }
 
 function drawAllPoses(canvas) {
@@ -202,4 +228,17 @@ function placePointAt(x,y) {
   const new_pose = Pose(new_point, new_point, new_point);
 
   poseList.push(new_pose)
+}
+
+function findPoseNear(x, y) {
+  for (let pose of poseList) {
+    const distance = Math.pow(x-pose.point.x, 2) + Math.pow(y-pose.point.y, 2);
+
+    if (distance < 450) {
+      console.log("Cursor is near", pose);
+      return pose;
+    }
+  }
+
+  return null;
 }
