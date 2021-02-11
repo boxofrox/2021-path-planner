@@ -13,7 +13,7 @@ const Pose = (point, enterHandle, exitHandle) => {
 // Constants
 
 const Tool = {
-  START: 0,
+  POSE: 0,
   WAYPOINT: 1,
   FINISH: 2,
   NONE: 3,
@@ -21,7 +21,7 @@ const Tool = {
 };
 
 const toolStateToName = {
-  [Tool.START]: 'start',
+  [Tool.POSE]: 'pose',
   [Tool.WAYPOINT]: 'waypoint',
   [Tool.FINISH]: 'finish',
   [Tool.NONE]: '',
@@ -37,7 +37,7 @@ const config = {
     { name: 'field'
     , file: './images/field.png'
     },
-    { name: 'start'
+    { name: 'pose'
     , file: './images/start.png'
     },
     { name: 'waypoint'
@@ -128,16 +128,8 @@ function onFieldLoaded(canvas) {
 
   const tool_map = [
     {
-      id: 'start-tool',
-      state: Tool.START,
-    },
-    {
-      id: 'waypoint-tool',
-      state: Tool.WAYPOINT,
-    },
-    {
-      id: 'finish-tool',
-      state: Tool.FINISH,
+      id: 'pose-tool',
+      state: Tool.POSE,
     },
     {
       id: 'select-tool',
@@ -187,7 +179,7 @@ function drawAllPoses(canvas) {
   const inner = poseList.slice(1, -1);
   const last = poseList.slice(-1);
 
-  drawPose(context, first[0], images[toolStateToName[Tool.START]]);
+  drawPose(context, first[0], images[toolStateToName[Tool.POSE]]);
 
   for (let pose of inner) {
     const image = images[toolStateToName[Tool.WAYPOINT]];
