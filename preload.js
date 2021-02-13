@@ -126,6 +126,7 @@ function onFieldLoaded(canvas) {
         const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
         placePointAt(x2, y2);
         clearCanvas(canvas);
+        drawBezier(canvas, poseList);
         drawAllPoses(canvas, poseList);
         break;
     }
@@ -150,6 +151,7 @@ function onFieldLoaded(canvas) {
             const p = Point(movePose.offset.x + x2, movePose.offset.y + y2);
             movePose.pose.point = p;
             clearCanvas(canvas);
+            drawBezier(canvas, poseList);
             drawAllPoses(canvas, poseList);
 
             break;
@@ -157,6 +159,7 @@ function onFieldLoaded(canvas) {
           case SelectState.NONE:
             hoveredPose = findPoseNear(x2, y2);
             clearCanvas(canvas);
+            drawBezier(canvas, poseList);
             drawAllPoses(canvas, poseList);
             break;
         }
@@ -173,6 +176,7 @@ function onFieldLoaded(canvas) {
         const y3 = y2 - images[tool].height / 2;
 
         clearCanvas(canvas);
+        drawBezier(canvas, poseList);
         drawAllPoses(canvas, poseList);
         drawTool(canvas, tool, x3, y3);
         break;
@@ -302,6 +306,34 @@ function drawAllPoses(canvas, poseList) {
   if (poseList.length > 1) {
     drawPose(context, last[0], images[toolStateToName[Tool.FINISH]]);
   }
+}
+
+function drawBezier(canvas, poseList) {
+  if (2 > poseList.length) {
+    return;
+  }
+
+  const context = canvas.getContext('2d');
+
+  let pose1 = poseList[0];
+
+  context.beginPath();
+  context.moveTo(pose1.point.x, pose1.point.y);
+
+  for (let pose2 of poseList.slice(1)) {
+    context.bezierCurveTo(
+      pose1.exitHandle.x + pose1.point.x,
+      pose1.exitHandle.y + pose1.point.y,
+      pose2.enterHandle.x + pose2.point.x,
+      pose2.enterHandle.y + pose2.point.y,
+      pose2.point.x,
+      pose2.point.y,
+    );
+
+    pose1 = pose2;
+  }
+
+  context.stroke();
 }
 
 function map(value, x1, w1, x2, w2) {
