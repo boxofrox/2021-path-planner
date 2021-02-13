@@ -1,6 +1,17 @@
 //Custom types
 
-const Point = (x, y) => ({x, y});
+PointPrototype = {
+  offset: function (other) {
+    return Point(this.x + other.x, this.y + other.y);
+  }
+};
+
+const Point = (x, y) => {
+  const self = Object.create(PointPrototype);
+  self.x = x;
+  self.y = y;
+  return self;
+};
 
 const Pose = (point, enterHandle, exitHandle) => {
   return{
