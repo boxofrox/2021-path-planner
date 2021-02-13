@@ -126,7 +126,7 @@ function onFieldLoaded(canvas) {
         const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
         placePointAt(x2, y2);
         clearCanvas(canvas);
-        drawAllPoses(canvas);
+        drawAllPoses(canvas, poseList);
         break;
     }
   });
@@ -150,14 +150,14 @@ function onFieldLoaded(canvas) {
             const p = Point(movePose.offset.x + x2, movePose.offset.y + y2);
             movePose.pose.point = p;
             clearCanvas(canvas);
-            drawAllPoses(canvas);
+            drawAllPoses(canvas, poseList);
 
             break;
 
           case SelectState.NONE:
             hoveredPose = findPoseNear(x2, y2);
             clearCanvas(canvas);
-            drawAllPoses(canvas);
+            drawAllPoses(canvas, poseList);
             break;
         }
 
@@ -173,7 +173,7 @@ function onFieldLoaded(canvas) {
         const y3 = y2 - images[tool].height / 2;
 
         clearCanvas(canvas);
-        drawAllPoses(canvas);
+        drawAllPoses(canvas, poseList);
         drawTool(canvas, tool, x3, y3);
         break;
     }
@@ -282,7 +282,7 @@ function drawPose(context, pose, image) {
   context.drawImage(image, x, y, size, size);
 }
 
-function drawAllPoses(canvas) {
+function drawAllPoses(canvas, poseList) {
   if (poseList.length < 1) return;
 
   const context = canvas.getContext('2d');
