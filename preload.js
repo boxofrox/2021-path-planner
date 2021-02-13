@@ -31,6 +31,11 @@ const Tool = {
   SELECT: 4,
 };
 
+const SelectState = {
+  NONE: 0,
+  MOVE_POSE: 1,
+}
+
 const toolStateToName = {
   [Tool.POSE]: 'pose',
   [Tool.WAYPOINT]: 'waypoint',
@@ -38,12 +43,17 @@ const toolStateToName = {
   [Tool.NONE]: '',
   [Tool.SELECT]: 'select',
 };
+
 // Global variable
 
 let toolState = Tool.NONE;
 const images = {};
 const poseList = [];
 let hoveredPose = null;
+let movePose = null;
+let selectState = SelectState.NONE;
+
+
 const config = {
   imageFiles: [
     { name: 'field'
@@ -134,9 +144,23 @@ function onFieldLoaded(canvas) {
     
     switch (toolState) {
       case Tool.SELECT:
-        hoveredPose = findPoseNear(x2, y2);
-        clearCanvas(canvas);
-        drawAllPoses(canvas);
+        switch (selectState) {
+          case SelectState.MOVE_POSE:
+            console.log("Has move pose", movePose);
+            const p = Point(movePose.offset.x + x2, movePose.offset.y + y2);
+            movePose.pose.point = p;
+            clearCanvas(canvas);
+            drawAllPoses(canvas);
+
+            break;
+
+          case SelectState.NONE:
+            hoveredPose = findPoseNear(x2, y2);
+            clearCanvas(canvas);
+            drawAllPoses(canvas);
+            break;
+        }
+
         break;
 
       case Tool.NONE:
@@ -156,6 +180,58 @@ function onFieldLoaded(canvas) {
 
     if ('' != tool) {
 
+    }
+  });
+
+  canvas.addEventListener('mousedown', ev => {
+
+    // Compute the screen position of the cursor relative to the canvas.
+    const x = ev.clientX - canvas.offsetLeft;
+    const y = ev.clientY - canvas.clientTop;
+
+    // Compute the canvas position of the cursor relative to the canvas.
+    const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
+    const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
+
+    switch (toolState) {
+      case Tool.POSE:
+        break;
+
+      case Tool.SELECT:
+        if (hoveredPose != null) {
+          selectState = SelectState.MOVE_POSE;
+
+          movePose = {
+            offset: Point(hoveredPose.point.x - x2, hoveredPose.point.y - y2),
+            pose: hoveredPose,
+          };
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    console.log("Mouse down", ev);
+
+  });
+
+  canvas.addEventListener('mouseup', ev => {
+    switch (toolState) {
+      case Tool.POSE:
+        break;
+
+      case Tool.SELECT:
+        switch (selectState) {
+          case SelectState.MOVE_POSE:
+            selectState = SelectState.NONE;
+            movePose = null;
+            break;
+        }
+        break;
+
+      default:
+        break;
     }
   });
 
