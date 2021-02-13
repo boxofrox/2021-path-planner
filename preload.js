@@ -148,7 +148,6 @@ function onFieldLoaded(canvas) {
       case Tool.SELECT:
         switch (selectState) {
           case SelectState.MOVE_POSE:
-            console.log("Has move pose", movePose);
             const p = Point(movePose.offset.x + x2, movePose.offset.y + y2);
             movePose.pose.point = p;
             clearCanvas(canvas);
@@ -220,7 +219,6 @@ function onFieldLoaded(canvas) {
         break;
     }
 
-    console.log("Mouse down", ev);
 
   });
 
@@ -391,7 +389,6 @@ function findPoseNear(x, y) {
     const distance = Math.pow(x - pose.point.x, 2) + Math.pow(y - pose.point.y, 2);
 
     if (distance < 450) {
-      console.log("Cursor is near", pose);
       return pose;
     }
   }
