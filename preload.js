@@ -14,9 +14,9 @@ const Point = (x, y) => {
 };
 
 const Pose = (point, enterHandle, exitHandle) => {
-  return{
+  return {
     point,
-    enterHandle, 
+    enterHandle,
     exitHandle,
   };
 };
@@ -124,7 +124,7 @@ function onFieldLoaded(canvas) {
         // Compute the canvas position of the cursor relative to the canvas.
         const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
         const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
-        placePointAt(x2,y2);
+        placePointAt(x2, y2);
         clearCanvas(canvas);
         drawAllPoses(canvas);
         break;
@@ -141,7 +141,7 @@ function onFieldLoaded(canvas) {
     // Compute the canvas position of the cursor relative to the canvas.
     const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
     const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
-    
+
     switch (toolState) {
       case Tool.SELECT:
         switch (selectState) {
@@ -261,7 +261,6 @@ function onFieldLoaded(canvas) {
   }
 }
 
-
 function clearCanvas(canvas) {
   const context = canvas.getContext('2d');
   context.drawImage(images.field, 0, 0);
@@ -274,7 +273,7 @@ function drawTool(canvas, tool, x, y) {
 }
 
 function drawPose(context, pose, image) {
-  const selected = pose===hoveredPose;
+  const selected = pose === hoveredPose;
   const size = selected ? 40 : 32;
 
   // Center tool image on cursor.
@@ -309,7 +308,7 @@ function map(value, x1, w1, x2, w2) {
   return (value - x1) * w2 / w1 + x2;
 }
 
-function placePointAt(x,y) {
+function placePointAt(x, y) {
   const new_point = Point(x, y);
 
   const new_pose = Pose(new_point, new_point, new_point);
@@ -319,7 +318,7 @@ function placePointAt(x,y) {
 
 function findPoseNear(x, y) {
   for (let pose of poseList) {
-    const distance = Math.pow(x-pose.point.x, 2) + Math.pow(y-pose.point.y, 2);
+    const distance = Math.pow(x - pose.point.x, 2) + Math.pow(y - pose.point.y, 2);
 
     if (distance < 450) {
       console.log("Cursor is near", pose);
