@@ -311,7 +311,7 @@ function map(value, x1, w1, x2, w2) {
 function placePointAt(x, y) {
   const new_point = Point(x, y);
 
-  const new_pose = Pose(new_point, new_point, new_point);
+  const new_pose = Pose(new_point, Point(-10, 0), Point(10, 0));
 
   poseList.push(new_pose)
 }
