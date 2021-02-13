@@ -128,6 +128,7 @@ function onFieldLoaded(canvas) {
         clearCanvas(canvas);
         drawBezier(canvas, poseList);
         drawAllPoses(canvas, poseList);
+        drawAllHandles(canvas, poseList);
         break;
     }
   });
@@ -153,6 +154,7 @@ function onFieldLoaded(canvas) {
             clearCanvas(canvas);
             drawBezier(canvas, poseList);
             drawAllPoses(canvas, poseList);
+            drawAllHandles(canvas, poseList);
 
             break;
 
@@ -161,6 +163,7 @@ function onFieldLoaded(canvas) {
             clearCanvas(canvas);
             drawBezier(canvas, poseList);
             drawAllPoses(canvas, poseList);
+            drawAllHandles(canvas, poseList);
             break;
         }
 
@@ -178,6 +181,7 @@ function onFieldLoaded(canvas) {
         clearCanvas(canvas);
         drawBezier(canvas, poseList);
         drawAllPoses(canvas, poseList);
+        drawAllHandles(canvas, poseList);
         drawTool(canvas, tool, x3, y3);
         break;
     }
@@ -336,6 +340,40 @@ function drawBezier(canvas, poseList) {
   context.stroke();
 }
 
+function drawAllHandles(canvas, poseList) {
+  if (poseList.length == 0) {
+    return;
+  }
+  const context = canvas.getContext('2d');
+
+  for (let pose of poseList) {
+    context.beginPath();
+    context.ellipse(
+      pose.enterHandle.x + pose.point.x,
+      pose.enterHandle.y + pose.point.y,
+      8,
+      8,
+      0,
+      0,
+      2 * Math.PI,
+    );
+    context.fill();
+
+    context.beginPath();
+    context.ellipse(
+      pose.exitHandle.x + pose.point.x,
+      pose.exitHandle.y + pose.point.y,
+      8,
+      8,
+      0,
+      0,
+      2 * Math.PI
+    );
+    context.fill();
+
+  }
+}
+
 function map(value, x1, w1, x2, w2) {
   return (value - x1) * w2 / w1 + x2;
 }
@@ -343,7 +381,7 @@ function map(value, x1, w1, x2, w2) {
 function placePointAt(x, y) {
   const new_point = Point(x, y);
 
-  const new_pose = Pose(new_point, Point(-10, 0), Point(10, 0));
+  const new_pose = Pose(new_point, Point(-100, 0), Point(100, 0));
 
   poseList.push(new_pose)
 }
