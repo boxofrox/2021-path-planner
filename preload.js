@@ -3,6 +3,10 @@
 PointPrototype = {
   offset: function (other) {
     return Point(this.x + other.x, this.y + other.y);
+  },
+
+  sub: function (other) {
+    return Point(this.x - other.x, this.y - other.y);
   }
 };
 
