@@ -400,14 +400,20 @@ function drawBezier(canvas, poseList) {
   context.stroke();
 }
 
+function isHandleSelected(handle) {
+  return (
+    null != hoveredHandle
+    && (
+         ( hoveredHandle.isEnter && handle === hoveredHandle.pose.enterHandle )
+      || ( !hoveredHandle.isEnter && handle === hoveredHandle.pose.exitHandle )
+    )
+  )
+}
+
 function drawHandle(context, handle, posePoint) {
   const p = handle.offset(posePoint);
 
-  const selected = (
-    null != hoveredHandle &&
-    (( hoveredHandle.isEnter && handle === hoveredHandle.pose.enterHandle ) ||
-    ( !hoveredHandle.isEnter && handle === hoveredHandle.pose.exitHandle ))
-  );
+  const selected = isHandleSelected(handle);
 
   const oldFillStyle = context.fillStyle;
 
