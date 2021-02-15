@@ -42,6 +42,23 @@ const SelectState = {
   MOVE_EXIT_HANDLE: 3,
 }
 
+const colors = {
+  handle: {
+    enter: {
+      color: "#03a9f4",
+      selected: {
+        color: "#76ff03",
+      },
+    },
+    exit: {
+      color: "#ff9800",
+      selected: {
+        color: "#76ff03",
+      },
+    },
+  },
+};
+
 const toolStateToName = {
   [Tool.POSE]: 'pose',
   [Tool.WAYPOINT]: 'waypoint',
@@ -413,17 +430,12 @@ function isHandleSelected(handle) {
   )
 }
 
-function drawHandle(context, handle, posePoint) {
+function drawHandle(context, handle, posePoint, style) {
   const p = handle.offset(posePoint);
-
-  const selected = isHandleSelected(handle);
 
   context.save();
 
-  if (selected) {
-    context.fillStyle = "#0F0";
-  }
-
+  context.fillStyle = style;
   context.lineWidth = 2.0;
 
   context.beginPath();
@@ -452,8 +464,17 @@ function drawAllHandles(canvas, poseList) {
   const context = canvas.getContext('2d');
 
   for (let pose of poseList) {
-    drawHandle(context, pose.enterHandle, pose.point);
-    drawHandle(context, pose.exitHandle, pose.point);
+    const enterColor = isHandleSelected(pose.enterHandle)
+      ? colors.handle.enter.selected.color
+      : colors.handle.enter.color;
+
+    drawHandle(context, pose.enterHandle, pose.point, enterColor);
+
+    const exitColor = isHandleSelected(pose.exitHandle)
+      ? colors.handle.exit.selected.color
+      : colors.handle.exit.color;
+
+    drawHandle(context, pose.exitHandle, pose.point, exitColor);
   }
 }
 
