@@ -381,6 +381,8 @@ function drawBezier(canvas, poseList) {
 
   let pose1 = poseList[0];
 
+  context.save();
+  context.lineWidth = 2.0;
   context.beginPath();
   context.moveTo(pose1.point.x, pose1.point.y);
 
@@ -398,6 +400,7 @@ function drawBezier(canvas, poseList) {
   }
 
   context.stroke();
+  context.restore();
 }
 
 function isHandleSelected(handle) {
@@ -415,11 +418,13 @@ function drawHandle(context, handle, posePoint) {
 
   const selected = isHandleSelected(handle);
 
-  const oldFillStyle = context.fillStyle;
+  context.save();
 
   if (selected) {
     context.fillStyle = "#0F0";
   }
+
+  context.lineWidth = 2.0;
 
   context.beginPath();
   context.ellipse(
@@ -437,7 +442,7 @@ function drawHandle(context, handle, posePoint) {
   context.lineTo(p.x, p.y);
   context.stroke();
 
-  context.fillStyle = oldFillStyle;
+  context.restore();
 }
 
 function drawAllHandles(canvas, poseList) {
