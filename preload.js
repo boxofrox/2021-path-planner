@@ -430,7 +430,7 @@ function isHandleSelected(handle) {
   )
 }
 
-function drawHandle(context, handle, posePoint, style) {
+function drawHandle(context, handle, posePoint, style, scale) {
   const p = handle.offset(posePoint);
 
   context.save();
@@ -447,8 +447,8 @@ function drawHandle(context, handle, posePoint, style) {
   context.ellipse(
     p.x,
     p.y,
-    8,
-    8,
+    8 * scale,
+    8 * scale,
     0,
     0,
     2 * Math.PI,
@@ -463,6 +463,7 @@ function drawAllHandles(canvas, poseList) {
   if (poseList.length == 0) {
     return;
   }
+
   const context = canvas.getContext('2d');
 
   for (let pose of poseList) {
@@ -470,13 +471,21 @@ function drawAllHandles(canvas, poseList) {
       ? colors.handle.enter.selected.color
       : colors.handle.enter.color;
 
-    drawHandle(context, pose.enterHandle, pose.point, enterColor);
+    const enterScale = isHandleSelected(pose.enterHandle)
+      ? 1.3
+      : 1.0;
+
+    drawHandle(context, pose.enterHandle, pose.point, enterColor, enterScale);
 
     const exitColor = isHandleSelected(pose.exitHandle)
       ? colors.handle.exit.selected.color
       : colors.handle.exit.color;
 
-    drawHandle(context, pose.exitHandle, pose.point, exitColor);
+    const exitScale = isHandleSelected(pose.exitHandle)
+      ? 1.3
+      : 1.0;
+
+    drawHandle(context, pose.exitHandle, pose.point, exitColor, exitScale);
   }
 }
 
