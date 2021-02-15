@@ -439,6 +439,11 @@ function drawHandle(context, handle, posePoint, style) {
   context.lineWidth = 2.0;
 
   context.beginPath();
+  context.moveTo(posePoint.x, posePoint.y);
+  context.lineTo(p.x, p.y);
+  context.stroke();
+
+  context.beginPath();
   context.ellipse(
     p.x,
     p.y,
@@ -449,9 +454,6 @@ function drawHandle(context, handle, posePoint, style) {
     2 * Math.PI,
   );
   context.fill();
-
-  context.moveTo(posePoint.x, posePoint.y);
-  context.lineTo(p.x, p.y);
   context.stroke();
 
   context.restore();
