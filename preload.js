@@ -38,6 +38,8 @@ const Tool = {
 const SelectState = {
   NONE: 0,
   MOVE_POSE: 1,
+  MOVE_ENTER_HANDLE: 2,
+  MOVE_EXIT_HANDLE: 3,
 }
 
 const toolStateToName = {
@@ -53,8 +55,13 @@ const toolStateToName = {
 let toolState = Tool.NONE;
 const images = {};
 const poseList = [];
+
 let hoveredPose = null;
 let movePose = null;
+
+let hoveredHandle = null;
+let moveHandle = null;
+
 let selectState = SelectState.NONE;
 
 
@@ -148,12 +155,16 @@ function onFieldLoaded(canvas) {
     const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
     const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
 
+    const mousePt = Point(x2, y2);
+
+    let pt;
+
     switch (toolState) {
       case Tool.SELECT:
         switch (selectState) {
           case SelectState.MOVE_POSE:
-            const p = Point(movePose.offset.x + x2, movePose.offset.y + y2);
-            movePose.pose.point = p;
+            pt = mousePt.offset(movePose.offset);
+            movePose.pose.point = pt;
             clearCanvas(canvas);
             drawBezier(canvas, poseList);
             drawAllPoses(canvas, poseList);
@@ -161,8 +172,27 @@ function onFieldLoaded(canvas) {
 
             break;
 
+          case SelectState.MOVE_ENTER_HANDLE:
+            pt = mousePt.offset(moveHandle.offset);
+            moveHandle.pose.enterHandle = pt.sub(moveHandle.pose.point);
+            clearCanvas(canvas);
+            drawBezier(canvas, poseList);
+            drawAllPoses(canvas, poseList);
+            drawAllHandles(canvas, poseList);
+            break;
+
+          case SelectState.MOVE_EXIT_HANDLE:
+            pt = mousePt.offset(moveHandle.offset);
+            moveHandle.pose.exitHandle = pt.sub(moveHandle.pose.point);
+            clearCanvas(canvas);
+            drawBezier(canvas, poseList);
+            drawAllPoses(canvas, poseList);
+            drawAllHandles(canvas, poseList);
+            break;
+
           case SelectState.NONE:
             hoveredPose = findPoseNear(x2, y2);
+            hoveredHandle = findHandleNear(x2, y2);
             clearCanvas(canvas);
             drawBezier(canvas, poseList);
             drawAllPoses(canvas, poseList);
@@ -204,6 +234,8 @@ function onFieldLoaded(canvas) {
     const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
     const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
 
+    const mousePt = Point(x2, y2);
+
     switch (toolState) {
       case Tool.POSE:
         break;
@@ -213,9 +245,25 @@ function onFieldLoaded(canvas) {
           selectState = SelectState.MOVE_POSE;
 
           movePose = {
-            offset: Point(hoveredPose.point.x - x2, hoveredPose.point.y - y2),
+            offset: hoveredPose.point.sub(mousePt),
             pose: hoveredPose,
           };
+        } else if (hoveredHandle != null) {
+          let offset;
+
+          if (hoveredHandle.isEnter) {
+            selectState = SelectState.MOVE_ENTER_HANDLE;
+            offset = hoveredHandle.pose.point.offset(hoveredHandle.pose.enterHandle).sub(mousePt);
+
+          } else {
+            selectState = SelectState.MOVE_EXIT_HANDLE;
+            offset = hoveredHandle.pose.point.offset(hoveredHandle.pose.exitHandle).sub(mousePt);
+          }
+
+          moveHandle = {
+            offset,
+            pose: hoveredHandle.pose,
+          }
         }
         break;
 
@@ -236,6 +284,16 @@ function onFieldLoaded(canvas) {
           case SelectState.MOVE_POSE:
             selectState = SelectState.NONE;
             movePose = null;
+            break;
+
+          case SelectState.MOVE_ENTER_HANDLE:
+            selectState = SelectState.NONE;
+            moveHandle = null;
+            break;
+
+          case SelectState.MOVE_EXIT_HANDLE:
+            selectState = SelectState.NONE;
+            moveHandle = null;
             break;
         }
         break;
@@ -342,6 +400,40 @@ function drawBezier(canvas, poseList) {
   context.stroke();
 }
 
+function drawHandle(context, handle, posePoint) {
+  const p = handle.offset(posePoint);
+
+  const selected = (
+    null != hoveredHandle &&
+    (( hoveredHandle.isEnter && handle === hoveredHandle.pose.enterHandle ) ||
+    ( !hoveredHandle.isEnter && handle === hoveredHandle.pose.exitHandle ))
+  );
+
+  const oldFillStyle = context.fillStyle;
+
+  if (selected) {
+    context.fillStyle = "#0F0";
+  }
+
+  context.beginPath();
+  context.ellipse(
+    p.x,
+    p.y,
+    8,
+    8,
+    0,
+    0,
+    2 * Math.PI,
+  );
+  context.fill();
+
+  context.moveTo(posePoint.x, posePoint.y);
+  context.lineTo(p.x, p.y);
+  context.stroke();
+
+  context.fillStyle = oldFillStyle;
+}
+
 function drawAllHandles(canvas, poseList) {
   if (poseList.length == 0) {
     return;
@@ -349,30 +441,8 @@ function drawAllHandles(canvas, poseList) {
   const context = canvas.getContext('2d');
 
   for (let pose of poseList) {
-    context.beginPath();
-    context.ellipse(
-      pose.enterHandle.x + pose.point.x,
-      pose.enterHandle.y + pose.point.y,
-      8,
-      8,
-      0,
-      0,
-      2 * Math.PI,
-    );
-    context.fill();
-
-    context.beginPath();
-    context.ellipse(
-      pose.exitHandle.x + pose.point.x,
-      pose.exitHandle.y + pose.point.y,
-      8,
-      8,
-      0,
-      0,
-      2 * Math.PI
-    );
-    context.fill();
-
+    drawHandle(context, pose.enterHandle, pose.point);
+    drawHandle(context, pose.exitHandle, pose.point);
   }
 }
 
@@ -394,6 +464,31 @@ function findPoseNear(x, y) {
 
     if (distance < 450) {
       return pose;
+    }
+  }
+
+  return null;
+}
+
+function findHandleNear(x, y) {
+  for (let pose of poseList) {
+    let pt = pose.point.offset(pose.enterHandle);
+    let distance = Math.pow(x - pt.x, 2) + Math.pow(y - pt.y, 2);
+
+    if (distance < 450) {
+      return {
+        pose,
+        isEnter: true,
+      };
+    }
+
+    pt = pose.point.offset(pose.exitHandle);
+    distance = Math.pow(x - pt.x, 2) + Math.pow(y - pt.y, 2);
+    if (distance < 450) {
+      return {
+        pose,
+        isEnter: false,
+      };
     }
   }
 
