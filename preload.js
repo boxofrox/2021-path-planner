@@ -549,11 +549,21 @@ function map(value, x1, w1, x2, w2) {
 }
 
 function placePointAt(x, y) {
-  const new_point = Point(x, y);
+  const newPoint = Point(x, y);
 
-  const new_pose = Pose(new_point, Vector(-100, 0), Vector(100, 0));
+  let newPose;
 
-  poseList.push(new_pose)
+  if (0 == poseList.length) {
+    newPose = Pose(newPoint, Vector(-100, 0), Vector(100, 0));
+  } else {
+    const lastPt = poseList.slice(-1)[0].point;
+    const enterVec = lastPt.sub(newPoint).unit().scale(100);
+    const exitVec = enterVec.scale(-1);
+
+    newPose = Pose(newPoint, enterVec, exitVec);
+  }
+
+  poseList.push(newPose)
 }
 
 function findPoseNear(x, y) {
