@@ -231,6 +231,7 @@ function onFieldLoaded(canvas) {
             const enterVec = enterPt.sub(moveHandle.pose.point);
 
             moveHandle.pose.enterHandle = enterVec;
+            moveHandle.pose.exitHandle = enterVec.unit().scale(-moveHandle.pose.exitHandle.length());
 
             redrawCanvas(context, poseList);
             break;
@@ -240,6 +241,7 @@ function onFieldLoaded(canvas) {
             const exitVec = exitPt.sub(moveHandle.pose.point);
 
             moveHandle.pose.exitHandle = exitVec;
+            moveHandle.pose.enterHandle = exitVec.unit().scale(-moveHandle.pose.enterHandle.length());
 
             redrawCanvas(context, poseList);
             break;
