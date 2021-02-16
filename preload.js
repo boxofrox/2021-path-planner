@@ -119,6 +119,10 @@ let selectState = SelectState.NONE;
 
 
 const config = {
+  fieldDims: {
+    xMeters: 9.14,
+    yMeters: 4.57,
+  },
   imageFiles: [
     { name: 'field'
     , file: './images/field.png'
@@ -617,6 +621,12 @@ function exportPoses(poseList) {
 
   const res = [];
 
+  let xCanvasToMeter = pt => Point(
+    pt.x / images.field.width * config.fieldDims.xMeters,
+    // Flip y-origin to bottom left corner of field.
+    (1.0 - (pt.y / images.field.height)) * config.fieldDims.yMeters,
+  );
+
   let ptToArray = pt => [ pt.x, pt.y ];
 
   let pose1 = poseList[0];
@@ -627,7 +637,7 @@ function exportPoses(poseList) {
     const cp2 = pose2.point.addVec(pose2.enterHandle);
     const p2 = pose2.point;
 
-    const record = [ p1, cp1, cp2, p2 ].map(ptToArray);
+    const record = [ p1, cp1, cp2, p2 ].map(xCanvasToMeter).map(ptToArray);
 
     res.push(record);
 
