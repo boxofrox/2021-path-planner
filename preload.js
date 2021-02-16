@@ -193,6 +193,7 @@ function onFieldLoaded(canvas) {
         // Compute the canvas position of the cursor relative to the canvas.
         const x2 = map(x, 0, canvas.offsetWidth, 0, canvas.width);
         const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
+
         placePointAt(x2, y2);
 
         redrawCanvas(context, poseList);
