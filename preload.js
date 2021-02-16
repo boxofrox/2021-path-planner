@@ -1,17 +1,53 @@
 //Custom types
 
 PointPrototype = {
-  offset: function (other) {
-    return Point(this.x + other.x, this.y + other.y);
+  addVec: function (vec) {
+    return Point(this.x + vec.x, this.y + vec.y);
   },
 
   sub: function (other) {
-    return Point(this.x - other.x, this.y - other.y);
-  }
+    return Vector(this.x - other.x, this.y - other.y);
+  },
 };
 
 const Point = (x, y) => {
   const self = Object.create(PointPrototype);
+  self.x = x;
+  self.y = y;
+  return self;
+};
+
+VectorPrototype = {
+  add: function (other) {
+    return Vector(this.x + other.x, this.y + other.y);
+  },
+
+  sub: function (other) {
+    return Vector(this.x - other.x, this.y - other.y);
+  },
+
+  scale: function (factor) {
+    return Vector(this.x * factor, this.y * factor);
+  },
+
+  length: function () {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  },
+
+  unit: function () {
+    const length = this.length();
+
+    // If near zero, return a zero vector.
+    if (0.001 > length) {
+      return Vector(0, 0);
+    } else {
+      return this.scale(1 / this.length());
+    }
+  },
+};
+
+const Vector = (x, y) => {
+  const self = Object.create(VectorPrototype);
   self.x = x;
   self.y = y;
   return self;
@@ -179,28 +215,31 @@ function onFieldLoaded(canvas) {
 
     const mousePt = Point(x2, y2);
 
-    let pt;
-
     switch (toolState) {
       case Tool.SELECT:
         switch (selectState) {
           case SelectState.MOVE_POSE:
-            pt = mousePt.offset(movePose.offset);
-            movePose.pose.point = pt;
+            const posePt = mousePt.addVec(movePose.offset);
+
+            movePose.pose.point = posePt;
 
             redrawCanvas(context, poseList);
             break;
 
           case SelectState.MOVE_ENTER_HANDLE:
-            pt = mousePt.offset(moveHandle.offset);
-            moveHandle.pose.enterHandle = pt.sub(moveHandle.pose.point);
+            const enterPt = mousePt.addVec(moveHandle.offset);
+            const enterVec = enterPt.sub(moveHandle.pose.point);
+
+            moveHandle.pose.enterHandle = enterVec;
 
             redrawCanvas(context, poseList);
             break;
 
           case SelectState.MOVE_EXIT_HANDLE:
-            pt = mousePt.offset(moveHandle.offset);
-            moveHandle.pose.exitHandle = pt.sub(moveHandle.pose.point);
+            const exitPt = mousePt.addVec(moveHandle.offset);
+            const exitVec = exitPt.sub(moveHandle.pose.point);
+
+            moveHandle.pose.exitHandle = exitVec;
 
             redrawCanvas(context, poseList);
             break;
@@ -263,11 +302,11 @@ function onFieldLoaded(canvas) {
 
           if (hoveredHandle.isEnter) {
             selectState = SelectState.MOVE_ENTER_HANDLE;
-            offset = hoveredHandle.pose.point.offset(hoveredHandle.pose.enterHandle).sub(mousePt);
+            offset = hoveredHandle.pose.point.addVec(hoveredHandle.pose.enterHandle).sub(mousePt);
 
           } else {
             selectState = SelectState.MOVE_EXIT_HANDLE;
-            offset = hoveredHandle.pose.point.offset(hoveredHandle.pose.exitHandle).sub(mousePt);
+            offset = hoveredHandle.pose.point.addVec(hoveredHandle.pose.exitHandle).sub(mousePt);
           }
 
           moveHandle = {
@@ -396,11 +435,14 @@ function drawBezier(context, poseList) {
   context.moveTo(pose1.point.x, pose1.point.y);
 
   for (let pose2 of poseList.slice(1)) {
+    const exitPt = pose1.point.addVec(pose1.exitHandle);
+    const enterPt = pose2.point.addVec(pose2.enterHandle);
+
     context.bezierCurveTo(
-      pose1.exitHandle.x + pose1.point.x,
-      pose1.exitHandle.y + pose1.point.y,
-      pose2.enterHandle.x + pose2.point.x,
-      pose2.enterHandle.y + pose2.point.y,
+      exitPt.x,
+      exitPt.y,
+      enterPt.x,
+      enterPt.y,
       pose2.point.x,
       pose2.point.y,
     );
@@ -423,7 +465,7 @@ function isHandleSelected(handle) {
 }
 
 function drawHandleLine(context, handle, posePoint) {
-  const p = handle.offset(posePoint);
+  const p = posePoint.addVec(handle);
 
   context.save();
 
@@ -438,7 +480,7 @@ function drawHandleLine(context, handle, posePoint) {
 }
 
 function drawHandleDot(context, handle, posePoint, style, scale) {
-  const p = handle.offset(posePoint);
+  const p = posePoint.addVec(handle);
 
   context.save();
 
@@ -507,7 +549,7 @@ function map(value, x1, w1, x2, w2) {
 function placePointAt(x, y) {
   const new_point = Point(x, y);
 
-  const new_pose = Pose(new_point, Point(-100, 0), Point(100, 0));
+  const new_pose = Pose(new_point, Vector(-100, 0), Vector(100, 0));
 
   poseList.push(new_pose)
 }
@@ -526,7 +568,7 @@ function findPoseNear(x, y) {
 
 function findHandleNear(x, y) {
   for (let pose of poseList) {
-    let pt = pose.point.offset(pose.enterHandle);
+    let pt = pose.point.addVec(pose.enterHandle);
     let distance = Math.pow(x - pt.x, 2) + Math.pow(y - pt.y, 2);
 
     if (distance < 450) {
@@ -536,7 +578,7 @@ function findHandleNear(x, y) {
       };
     }
 
-    pt = pose.point.offset(pose.exitHandle);
+    pt = pose.point.addVec(pose.exitHandle);
     distance = Math.pow(x - pt.x, 2) + Math.pow(y - pt.y, 2);
     if (distance < 450) {
       return {
