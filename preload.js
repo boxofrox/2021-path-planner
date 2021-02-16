@@ -377,6 +377,12 @@ function onFieldLoaded(canvas) {
       elem.classList.add('active');
     });
   }
+
+  // Add event handlers for export button.
+  document.getElementById('export')
+    .addEventListener('click', ev => {
+      console.log(exportPoses(poseList));
+    });
 }
 
 function redrawCanvas(context, poseList) {
@@ -602,4 +608,31 @@ function findHandleNear(x, y) {
   }
 
   return null;
+}
+
+function exportPoses(poseList) {
+  if (2 > poseList.length) {
+    return [];
+  }
+
+  const res = [];
+
+  let ptToArray = pt => [ pt.x, pt.y ];
+
+  let pose1 = poseList[0];
+
+  for (let pose2 of poseList.slice(1)) {
+    const p1 = pose1.point;
+    const cp1 = pose1.point.addVec(pose1.exitHandle);
+    const cp2 = pose2.point.addVec(pose2.enterHandle);
+    const p2 = pose2.point;
+
+    const record = [ p1, cp1, cp2, p2 ].map(ptToArray);
+
+    res.push(record);
+
+    pose1 = pose2;
+  }
+
+  return res;
 }
