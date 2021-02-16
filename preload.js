@@ -340,8 +340,9 @@ function onFieldLoaded(canvas) {
 function redrawCanvas(context, poseList) {
   clearCanvas(context);
   drawBezier(context, poseList);
+  drawAllHandleLines(context, poseList);
   drawAllPoses(context, poseList);
-  drawAllHandles(context, poseList);
+  drawAllHandleDots(context, poseList);
 }
 
 function clearCanvas(context) {
@@ -421,18 +422,28 @@ function isHandleSelected(handle) {
   )
 }
 
-function drawHandle(context, handle, posePoint, style, scale) {
+function drawHandleLine(context, handle, posePoint) {
   const p = handle.offset(posePoint);
 
   context.save();
 
-  context.fillStyle = style;
   context.lineWidth = 2.0;
 
   context.beginPath();
   context.moveTo(posePoint.x, posePoint.y);
   context.lineTo(p.x, p.y);
   context.stroke();
+
+  context.restore();
+}
+
+function drawHandleDot(context, handle, posePoint, style, scale) {
+  const p = handle.offset(posePoint);
+
+  context.save();
+
+  context.fillStyle = style;
+  context.lineWidth = 2.0;
 
   context.beginPath();
   context.ellipse(
@@ -450,7 +461,18 @@ function drawHandle(context, handle, posePoint, style, scale) {
   context.restore();
 }
 
-function drawAllHandles(context, poseList) {
+function drawAllHandleLines(context, poseList) {
+  if (poseList.length == 0) {
+    return;
+  }
+
+  for (let pose of poseList) {
+    drawHandleLine(context, pose.enterHandle, pose.point);
+    drawHandleLine(context, pose.exitHandle, pose.point);
+  }
+}
+
+function drawAllHandleDots(context, poseList) {
   if (poseList.length == 0) {
     return;
   }
@@ -464,7 +486,7 @@ function drawAllHandles(context, poseList) {
       ? 1.3
       : 1.0;
 
-    drawHandle(context, pose.enterHandle, pose.point, enterColor, enterScale);
+    drawHandleDot(context, pose.enterHandle, pose.point, enterColor, enterScale);
 
     const exitColor = isHandleSelected(pose.exitHandle)
       ? colors.handle.exit.selected.color
@@ -474,7 +496,7 @@ function drawAllHandles(context, poseList) {
       ? 1.3
       : 1.0;
 
-    drawHandle(context, pose.exitHandle, pose.point, exitColor, exitScale);
+    drawHandleDot(context, pose.exitHandle, pose.point, exitColor, exitScale);
   }
 }
 
