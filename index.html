@@ -25,13 +25,20 @@ body {
   }
 
   .toolbar {
-    display:flex;
-    flex-direction:column;
-
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
   .toolbar > .tool:not(.active) {
     filter: grayscale(1);
+  }
+
+  .c-toolbar__start
+  , .c-toolbar__middle
+  , .c-toolbar__end {
+    display: flex;
+    flex-direction: column;
   }
 
 </style>
@@ -43,8 +50,14 @@ body {
   </head>
   <body>
 <div class="toolbar">
-  <img id="select-tool" class="tool" src="images/finish.png" />
-  <img id="pose-tool" class="tool" src="images/start.png" />
+  <div class="c-toolbar__start">
+    <img id="select-tool" class="tool" src="images/finish.png" />
+    <img id="pose-tool" class="tool" src="images/start.png" />
+  </div>
+  <div class="c-toolbar__middle">
+  </div>
+  <div class="c-toolbar__end">
+  </div>
 </div>
 <div class="field">
   <canvas id="canvas"></canvas>
