@@ -159,10 +159,7 @@ function onFieldLoaded(canvas) {
         const y2 = map(y, 0, canvas.offsetHeight, 0, canvas.height);
         placePointAt(x2, y2);
 
-        clearCanvas(context);
-        drawBezier(context, poseList);
-        drawAllPoses(context, poseList);
-        drawAllHandles(context, poseList);
+        redrawCanvas(context, poseList);
         break;
     }
   });
@@ -190,41 +187,29 @@ function onFieldLoaded(canvas) {
           case SelectState.MOVE_POSE:
             pt = mousePt.offset(movePose.offset);
             movePose.pose.point = pt;
-            clearCanvas(context);
-            drawBezier(context, poseList);
-            drawAllPoses(context, poseList);
-            drawAllHandles(context, poseList);
 
+            redrawCanvas(context, poseList);
             break;
 
           case SelectState.MOVE_ENTER_HANDLE:
             pt = mousePt.offset(moveHandle.offset);
             moveHandle.pose.enterHandle = pt.sub(moveHandle.pose.point);
 
-            clearCanvas(context);
-            drawBezier(context, poseList);
-            drawAllPoses(context, poseList);
-            drawAllHandles(context, poseList);
+            redrawCanvas(context, poseList);
             break;
 
           case SelectState.MOVE_EXIT_HANDLE:
             pt = mousePt.offset(moveHandle.offset);
             moveHandle.pose.exitHandle = pt.sub(moveHandle.pose.point);
 
-            clearCanvas(context);
-            drawBezier(context, poseList);
-            drawAllPoses(context, poseList);
-            drawAllHandles(context, poseList);
+            redrawCanvas(context, poseList);
             break;
 
           case SelectState.NONE:
             hoveredPose = findPoseNear(x2, y2);
             hoveredHandle = findHandleNear(x2, y2);
 
-            clearCanvas(context);
-            drawBezier(context, poseList);
-            drawAllPoses(context, poseList);
-            drawAllHandles(context, poseList);
+            redrawCanvas(context, poseList);
             break;
         }
 
@@ -239,10 +224,7 @@ function onFieldLoaded(canvas) {
         const x3 = x2 - images[tool].width / 2;
         const y3 = y2 - images[tool].height / 2;
 
-        clearCanvas(context);
-        drawBezier(context, poseList);
-        drawAllPoses(context, poseList);
-        drawAllHandles(context, poseList);
+        redrawCanvas(context, poseList);
         drawTool(context, tool, x3, y3);
         break;
     }
@@ -353,6 +335,13 @@ function onFieldLoaded(canvas) {
       elem.classList.add('active');
     });
   }
+}
+
+function redrawCanvas(context, poseList) {
+  clearCanvas(context);
+  drawBezier(context, poseList);
+  drawAllPoses(context, poseList);
+  drawAllHandles(context, poseList);
 }
 
 function clearCanvas(context) {
