@@ -117,8 +117,11 @@ let moveHandle = null;
 
 let selectState = SelectState.NONE;
 
-
 const config = {
+  fieldDims: {
+    xmeters: 9.14,
+    ymeters: 4.57,
+  },
   imageFiles: [
     { name: 'field'
     , file: './images/field.png'
@@ -376,6 +379,11 @@ function onFieldLoaded(canvas) {
       elem.classList.add('active');
     });
   }
+  
+  document.getElementById('export').addEventListener('click', ev => {
+    const data = exportPoses(poseList);
+    console.log(data);
+  })
 }
 
 function redrawCanvas(context, poseList) {
@@ -600,4 +608,32 @@ function findHandleNear(x, y) {
   }
 
   return null;
+}
+
+function exportPoses(poseList) {
+  if (2 > poseList.length) {
+    return [];
+  } else {
+    const result = [];
+    const pointToArray = pt => [pt.x, pt.y];
+    const canvasToMeters = point => Point(
+      point.x / images.field.width * config.fieldDims.xmeters,
+      (1 - (point.y / images.field.height)) * config.fieldDims.ymeters,
+    );
+
+    let pose1 = poseList[0];
+    for (let pose2 of poseList.slice(1)){
+      const segment = [
+        pose1.point,
+        pose1.point.addVec(pose1.exitHandle),
+        pose2.point.addVec(pose2.enterHandle),
+        pose2.point,
+      ].map(canvasToMeters)
+      .map(pointToArray);
+
+      result.push(segment);
+      pose1 = pose2;
+    }
+    return result;
+  }
 }
