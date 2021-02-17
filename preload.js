@@ -550,8 +550,17 @@ function map(value, x1, w1, x2, w2) {
 
 function placePointAt(x, y) {
   const new_point = Point(x, y);
+  let new_pose;
 
-  const new_pose = Pose(new_point, Vector(-100, 0), Vector(100, 0));
+  if (0 == poseList.length) {
+    new_pose = Pose(new_point, Vector(-100, 0), Vector(100, 0));
+  } else {
+    const last_point = poseList.slice(-1)[0].point;
+    const enterVec =  last_point.sub(new_point).unit().scale(100);
+    const exitVec = enterVec.scale(-1);
+
+    new_pose = Pose(new_point, enterVec, exitVec);
+  }
 
   poseList.push(new_pose)
 }
