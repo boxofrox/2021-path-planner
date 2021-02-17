@@ -375,7 +375,7 @@ function onFieldLoaded(canvas) {
     elem.addEventListener('click', () => {
       toolState = tool.state;
 
-      document.querySelectorAll('.toolbar > .tool').forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.toolbar .tool').forEach(item => item.classList.remove('active'));
       elem.classList.add('active');
     });
   }
