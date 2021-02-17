@@ -230,6 +230,7 @@ function onFieldLoaded(canvas) {
             const enterPt = mousePt.addVec(moveHandle.offset);
             const enterVec = enterPt.sub(moveHandle.pose.point);
 
+            moveHandle.pose.exitHandle = enterVec.scale(-1).unit().scale(moveHandle.pose.exitHandle.length());
             moveHandle.pose.enterHandle = enterVec;
 
             redrawCanvas(context, poseList);
@@ -240,6 +241,7 @@ function onFieldLoaded(canvas) {
             const exitVec = exitPt.sub(moveHandle.pose.point);
 
             moveHandle.pose.exitHandle = exitVec;
+            moveHandle.pose.enterHandle = exitVec.scale(-1).unit().scale(moveHandle.pose.enterHandle.length());
 
             redrawCanvas(context, poseList);
             break;
